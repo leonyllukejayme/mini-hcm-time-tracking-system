@@ -1,37 +1,65 @@
-const Sidebar = () => {
+import { NavLink } from 'react-router';
+
+const Sidebar = ({ role = 'employee' }) => {
+	const isAdmin = role === 'admin';
+
+	const navLinks = isAdmin
+		? [
+				{ name: 'Dashboard', icon: 'dashboard', path: '/admin/dashboard' },
+				{ name: 'Employee List', icon: 'badge', path: '/admin/employees' },
+				{ name: 'Reports', icon: 'bar_chart', path: '/admin/reports' },
+			]
+		: [
+				{ name: 'Dashboard', icon: 'dashboard', path: '/employee/dashboard' },
+				{
+					name: 'My Attendance',
+					icon: 'schedule',
+					path: '/employee/attendance',
+				},
+				{ name: 'My Profile', icon: 'person', path: '/employee/profile' },
+			];
+
 	return (
-		<aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col w-9xl shrink-0">
-			<div class="p-6 flex items-center gap-3">
-				<div class="size-10 rounded-lg bg-primary flex items-center justify-center text-white">
-					<span class="material-symbols-outlined">corporate_fare</span>
+		<aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+			{/* Logo Section */}
+			<div className="p-6 flex items-center gap-3">
+				<div className="size-10 rounded-lg bg-primary flex items-center justify-center text-white">
+					<span className="material-symbols-outlined">corporate_fare</span>
 				</div>
 				<div>
-					<h1 class="text-sm font-bold leading-none">Mini HCM</h1>
-					<p class="text-xs text-slate-500 mt-1 uppercase tracking-wider font-semibold">
-						Admin Portal
+					<h1 className="text-sm font-bold leading-none">Mini HCM</h1>
+					<p className="text-xs text-slate-500 mt-1 tracking-wider font-semibold">
+						{isAdmin ? 'Admin Portal' : 'Time Tracking System'}
 					</p>
 				</div>
 			</div>
-			<nav class="flex-1 px-4 space-y-1">
-				<a
-					class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary font-medium"
-					href="#">
-					<span class="material-symbols-outlined">dashboard</span>
-					<span class="text-sm">Dashboard</span>
-				</a>
-				<a
-					class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-					href="#">
-					<span class="material-symbols-outlined">badge</span>
-					<span class="text-sm">Employee List</span>
-				</a>
+
+			{/* Navigation */}
+			<nav className="flex-1 px-4 space-y-1">
+				{navLinks.map((link) => (
+					<NavLink
+						key={link.name}
+						to={link.path}
+						className={({ isActive }) =>
+							`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+								isActive
+									? 'bg-primary/10 text-primary font-medium'
+									: 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+							}`
+						}>
+						<span className="material-symbols-outlined">{link.icon}</span>
+						<span className="text-sm">{link.name}</span>
+					</NavLink>
+				))}
 			</nav>
-			<div class="p-4 border-t border-slate-200 dark:border-slate-800">
-				<button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
-					<span class="material-symbols-outlined">settings</span>
-					<span class="text-sm font-medium">Settings</span>
+
+			{/* Bottom Section */}
+			<div className="p-4 border-t border-slate-200 dark:border-slate-800">
+				<button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+					<span className="material-symbols-outlined">settings</span>
+					<span className="text-sm font-medium">Settings</span>
 				</button>
-				{/* <div class="mt-4 flex items-center gap-3 px-3">
+				<div class="mt-4 flex items-center gap-3 px-3">
 					<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
 						<img
 							alt="Admin"
@@ -43,7 +71,7 @@ const Sidebar = () => {
 						<p class="text-xs font-bold truncate">Alex Richards</p>
 						<p class="text-[10px] text-slate-500 uppercase">Super Admin</p>
 					</div>
-				</div> */}
+				</div>
 			</div>
 		</aside>
 	);
