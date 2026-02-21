@@ -1,10 +1,17 @@
+import { Route, Routes } from "react-router"
+import Layout from "./layouts/layout"
+import AdminDashboard from "./pages/AdminDashboard"
+import EmployeeDashboard from "./pages/EmployeeDashboard"
 
 function App() {
 
   return (
-    <>
-      <h1 className="text-6xl font-bold">Welcome to the App!</h1>
-    </>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route path="/dashboard/admin" element={<AdminDashboard />} />
+        <Route path="/dashboard" element={<EmployeeDashboard />} />
+      </Route>
+    </Routes>
   )
 }
 
