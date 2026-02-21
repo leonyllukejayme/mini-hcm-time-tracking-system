@@ -104,7 +104,7 @@ const AdminDashboard = () => {
 								<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
 									ND (Night Diff)
 								</th>
-								<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-rose-500">
+								<th class="px-6 py-4 text-xs font-bold  uppercase tracking-wider text-rose-500">
 									Late (Min)
 								</th>
 								<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
