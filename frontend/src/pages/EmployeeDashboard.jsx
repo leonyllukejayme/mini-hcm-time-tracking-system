@@ -11,37 +11,6 @@ const EmployeeDashboard = () => {
 		<div className="flex-1 overflow-y-auto p-8 space-y-8">
 			<section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				<TimeStatusCard />
-				{/* <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-					<div className="flex items-center gap-6">
-						<div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
-							<span className="material-symbols-outlined text-primary text-5xl">
-								schedule
-							</span>
-						</div>
-						<div>
-							<p className="text-sm font-medium text-slate-500 uppercase tracking-wider">
-								Current Status:{' '}
-								<span className="text-amber-600 dark:text-amber-400">
-									Clocked Out
-								</span>
-							</p>
-							<h3 className="text-4xl font-bold tracking-tight mt-1">
-								10:45:22 AM
-							</h3>
-							<p className="text-slate-500 font-medium">Monday, October 23, 2023</p>
-						</div>
-					</div>
-					<div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-						<button className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/20">
-							<span className="material-symbols-outlined">login</span>
-							Punch In
-						</button>
-						<button className="bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed px-8 py-3 rounded-lg font-bold flex items-center justify-center gap-2">
-							<span className="material-symbols-outlined">logout</span>
-							Punch Out
-						</button>
-					</div>
-				</div> */}
 			</section>
 			{/* today summary */}
 			<section>
