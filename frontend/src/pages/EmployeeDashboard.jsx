@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import Badge from '../../components/Badge';
-import SummaryCard from '../../components/SummaryCard';
-import TimeStatusCard from '../../components/TimeStatusCard';
+import Badge from '../components/Badge';
+import SummaryCard from '../components/SummaryCard';
+import TimeStatusCard from '../components/TimeStatusCard';
 
 const EmployeeDashboard = () => {
 	useEffect(() => {

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import KPICard from '../../components/KPICard';
-import TeamSummaryTable from '../../components/TeamSummaryTable';
+import KPICard from '../components/KPICard';
+import TeamSummaryTable from '../components/TeamSummaryTable';
 
 const AdminDashboard = () => {
 	const employees = [
