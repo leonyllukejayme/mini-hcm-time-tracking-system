@@ -35,8 +35,10 @@ function calculateHours(timeIn, timeOut, scheduleStart, scheduleEnd) {
 		: 0;
 
 	// Calculate regular minutes by subtracting deductions from total worked
-	const regularMinutes =
-		totalWorked - overtimeMinutes - lateMinutes - undertimeMinutes;
+	const regularMinutes = Math.max(
+		totalWorked - overtimeMinutes - lateMinutes - undertimeMinutes,
+		0,
+	);
 
 	// Calculate night differential hours (10pm to 6am)
 	const nightDiffMinutes = computeNightDiff(start, end);

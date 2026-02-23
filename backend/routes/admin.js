@@ -51,8 +51,8 @@ router.put('/punches/:id', verifyToken, isAdmin, async (req, res) => {
 			req.userData.schedule.start,
 			req.userData.schedule.end,
 		);
-
 		await db.collection('attendance').doc(req.params.id).update({
+			date: dayjs(timeInTimestamp).format('YYYY-MM-DD'),
 			timeIn: timeInTimestamp,
 			timeOut: timeOutTimestamp,
 			computed,
