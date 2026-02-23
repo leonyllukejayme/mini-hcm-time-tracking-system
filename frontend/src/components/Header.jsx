@@ -1,7 +1,6 @@
 const Header = ({
 	role = 'employee',
 	title,
-	dateRange = 'May 22 - May 28, 2024',
 }) => {
 	const isAdmin = role === 'admin';
 
@@ -10,12 +9,12 @@ const Header = ({
 			{/* Left Section */}
 			<div className="flex items-center gap-4">
 				<h2 className="text-xl font-bold text-slate-900 dark:text-white">
-					{title || (isAdmin ? 'Admin Dashboard' : 'Employee Dashboard')}
+					{title || (isAdmin ? 'Admin Portal' : 'Employee Portal')}
 				</h2>
 
-				<div className="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
+				{/* <div className="h-6 w-px bg-slate-200 dark:bg-slate-700"></div> */}
 
-				<div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+				{/* <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
 					<span className="material-symbols-outlined text-base">
 						calendar_today
 					</span>
@@ -25,15 +24,15 @@ const Header = ({
 					<button className="material-symbols-outlined text-base hover:text-primary transition-colors cursor-pointer">
 						expand_more
 					</button>
-				</div>
+				</div> */}
 			</div>
 
 			{/* Right Section */}
 			<div className="flex items-center gap-3">
 				{/* Notifications */}
-				<button className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
+				{/* <button className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
 					<span className="material-symbols-outlined">notifications</span>
-				</button>
+				</button> */}
 
 				{/* Admin Only Button */}
 				{isAdmin ? (

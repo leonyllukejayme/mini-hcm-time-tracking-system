@@ -1,8 +1,17 @@
+import axios from 'axios';
 import { useEffect, useState } from 'react';
+
+const ATTENDANCE_UPDATED_EVENT = 'attendance:updated';
 
 const TimeStatusCard = () => {
 	const [currentTime, setCurrentTime] = useState(new Date());
 	const [isClockedIn, setIsClockedIn] = useState(false);
+	const [timeIn, setTimeIn] = useState(null);
+	const apiBaseUrl = import.meta.env.VITE_BACKEND_URL || '';
+
+	const notifyAttendanceUpdated = () => {
+		window.dispatchEvent(new Event(ATTENDANCE_UPDATED_EVENT));
+	};
 
 	// Live Clock
 	useEffect(() => {
@@ -13,14 +22,70 @@ const TimeStatusCard = () => {
 		return () => clearInterval(timer);
 	}, []);
 
+	useEffect(() => {
+		const token = localStorage.getItem('token');
+		if (!token) return;
+
+		axios
+			.get(`${apiBaseUrl}/api/attendance/status`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+			.then(({ data }) => {
+				setIsClockedIn(Boolean(data?.isClockedIn));
+				setTimeIn(data?.timeIn ? new Date(data.timeIn) : null);
+			})
+			.catch((error) => {
+				console.error('Failed to load attendance status:', error);
+			});
+	}, [apiBaseUrl]);
+
 	const handlePunchIn = () => {
+		const token = localStorage.getItem('token');
+		const previousTimeIn = timeIn;
 		setIsClockedIn(true);
-		// TODO: call backend API here
+		setTimeIn(new Date());
+
+		axios
+			.post(`${apiBaseUrl}/api/attendance/punch-in`, null, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+			.then(({ data }) => {
+				if (data?.timeIn) {
+					setTimeIn(new Date(data.timeIn));
+				}
+				notifyAttendanceUpdated();
+			})
+			.catch((error) => {
+				console.error('Punch in failed:', error);
+				setIsClockedIn(false);
+				setTimeIn(previousTimeIn);
+			});
 	};
 
 	const handlePunchOut = () => {
+		const token = localStorage.getItem('token');
+		const previousTimeIn = timeIn;
 		setIsClockedIn(false);
-		// TODO: call backend API here
+		setTimeIn(null);
+
+		axios
+			.post(`${apiBaseUrl}/api/attendance/punch-out`, null, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			})
+			.then(() => {
+				notifyAttendanceUpdated();
+			})
+			.catch((error) => {
+				console.error('Punch out failed:', error);
+				setIsClockedIn(true);
+				setTimeIn(previousTimeIn);
+			});
 	};
 
 	const formattedTime = currentTime.toLocaleTimeString();
@@ -59,6 +124,9 @@ const TimeStatusCard = () => {
 					</h3>
 
 					<p className="text-slate-500 font-medium">{formattedDate}</p>
+					{/* {timeIn && (
+						<p className="text-slate-500 text-sm">Time In: {timeIn.toLocaleTimeString()}</p>
+					)} */}
 				</div>
 			</div>
 

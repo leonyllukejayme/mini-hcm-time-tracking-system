@@ -12,6 +12,13 @@ const Badge = ({ title }) => {
 			</span>
 		);
 	}
+	else if (title === 'In Progress') {
+		return (
+			<span className="px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded text-xs font-bold">
+				In Progress
+			</span>
+		);
+	}
 };
 
 export default Badge;

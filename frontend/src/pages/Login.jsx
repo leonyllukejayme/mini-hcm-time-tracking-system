@@ -8,8 +8,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     email: "",
-    password: "",
-    remember: false,
+    password: "", 
   });
 
   const [showPassword, setShowPassword] = useState(false);

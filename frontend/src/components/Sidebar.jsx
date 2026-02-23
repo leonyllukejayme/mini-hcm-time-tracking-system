@@ -1,9 +1,14 @@
 import { NavLink } from 'react-router';
 import useLogout from '../hooks/useLogout';
-
+import { auth, db } from '../firebase';
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 const Sidebar = ({ role = 'employee' }) => {
 	const isAdmin = role === 'admin';
 	const logout = useLogout();
+	const [userName, setUserName] = useState('User');
+	const [userRole, setUserRole] = useState(role);
 
 	const navLinks = isAdmin
 		? [
@@ -12,14 +17,45 @@ const Sidebar = ({ role = 'employee' }) => {
 				{ name: 'Reports', icon: 'bar_chart', path: '/admin/reports' },
 			]
 		: [
-				{ name: 'Dashboard', icon: 'dashboard', path: '/employee/dashboard' },
-				{
-					name: 'My Attendance',
-					icon: 'schedule',
-					path: '/employee/attendance',
-				},
-				{ name: 'My Profile', icon: 'person', path: '/employee/profile' },
+				{ name: 'Dashboard', icon: 'dashboard', path: '/dashboard' },
+				{ name: 'Reports', icon: 'bar_chart', path: '/reports' },
+				// {
+				// 	name: 'My Attendance',
+				// 	icon: 'schedule',
+				// 	path: '/attendance',
+				// },
+				// { name: 'My Profile', icon: 'person', path: '/profile' },
 			];
+
+	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+			if (!firebaseUser) {
+				setUserName('User');
+				setUserRole(role);
+				return;
+			}
+
+			const fallbackName =
+				firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User';
+
+			try {
+				const userSnap = await getDoc(doc(db, 'users', firebaseUser.uid));
+				if (userSnap.exists()) {
+					const userData = userSnap.data();
+					setUserName(userData.name || userData.fullName || fallbackName);
+					setUserRole(userData.role || role);
+					return;
+				}
+			} catch (error) {
+				console.error('Failed to load sidebar user info:', error);
+			}
+
+			setUserName(fallbackName);
+			setUserRole(role);
+		});
+
+		return () => unsubscribe();
+	}, [role]);
 
 	return (
 		<aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
@@ -77,8 +113,8 @@ const Sidebar = ({ role = 'employee' }) => {
 						/>
 					</div>
 					<div className="flex-1 overflow-hidden">
-						<p className="text-xs font-bold truncate">Alex Richards</p>
-						<p className="text-[10px] text-slate-500 uppercase">Super Admin</p>
+						<p className="text-xs font-bold truncate">{userName}</p>
+						<p className="text-[10px] text-slate-500 uppercase">{userRole}</p>
 					</div>
 				</div>
 			</div>
