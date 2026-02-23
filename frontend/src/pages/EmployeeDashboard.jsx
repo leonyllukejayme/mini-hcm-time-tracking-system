@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Badge from '../components/Badge';
 import SummaryCard from '../components/SummaryCard';
 import TimeStatusCard from '../components/TimeStatusCard';
+import { Toaster } from 'react-hot-toast';
 
 const ATTENDANCE_UPDATED_EVENT = 'attendance:updated';
 
@@ -105,6 +106,7 @@ const EmployeeDashboard = () => {
 
 	return (
 		<div className="flex-1 overflow-y-auto p-8 space-y-8">
+			<Toaster />
 			<section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				<TimeStatusCard />
 			</section>
