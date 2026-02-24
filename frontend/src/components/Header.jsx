@@ -35,7 +35,7 @@ const Header = ({
 				</button> */}
 
 				{/* Admin Only Button */}
-				{isAdmin ? (
+				{/* {isAdmin ? (
 					<button
 						className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-primary/90 transition-colors">
 						<span className="material-symbols-outlined text-sm">
@@ -43,7 +43,7 @@ const Header = ({
 						</span>
 						Add Employee
 					</button>
-				) : null}
+				) : null} */}
 			</div>
 		</header>
 	);

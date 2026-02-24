@@ -37,7 +37,7 @@ export default function Login() {
 			const userDoc = await getDoc(doc(db, 'users', credential.user.uid));
 
 			if (userDoc.exists() && userDoc.data().role === 'admin') {
-				navigate('/dashboard/admin');
+				navigate('/admin/dashboard');
 				toast.success('Login successful!', {
 					position: 'top-right',
 				});
@@ -46,7 +46,7 @@ export default function Login() {
 			toast.success('Login successful!', {
 				position: 'top-right',
 			});
-			navigate('/dashboard');
+			navigate('/employee/dashboard');
 		} catch (error) {
 			console.error('Login failed:', error);
 			toast.error('Invalid email or password. Please try again.', {

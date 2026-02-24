@@ -1,3 +1,4 @@
+import { Toaster } from 'react-hot-toast';
 import { Route, Routes } from 'react-router';
 import AdminLayout from './layouts/AdminLayout';
 import EmployeeLayout from './layouts/EmployeeLayout';
@@ -6,32 +7,34 @@ import EmployeeDashboard from './pages/EmployeeDashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProtectedRoute from './ProtectedRoute';
-import { Toaster } from 'react-hot-toast';
+import Settings from './pages/Settings';
 
 function App() {
 	return (
 		<>
-      <Toaster />
+			<Toaster />
 			<Routes>
 				<Route path="/" element={<Login />} />
 				<Route path="/register" element={<Register />} />
 				<Route
-					path="/dashboard/admin"
+					path="admin/"
 					element={
 						<ProtectedRoute role="admin" children={''}>
 							<AdminLayout />
 						</ProtectedRoute>
 					}>
-					<Route index element={<AdminDashboard />} />
+					<Route path='dashboard' element={<AdminDashboard />} />
+					<Route path="settings" element={<Settings />} />
 				</Route>
 				<Route
-					path="/dashboard"
+					path="employee/"
 					element={
 						<ProtectedRoute role="employee" children={''}>
 							<EmployeeLayout />
 						</ProtectedRoute>
 					}>
-					<Route index element={<EmployeeDashboard />} />
+					<Route path='dashboard' element={<EmployeeDashboard />} />
+					<Route path="settings" element={<Settings />} />
 				</Route>
 				<Route path="*" element={<div>404 Not Found</div>} />
 			</Routes>
