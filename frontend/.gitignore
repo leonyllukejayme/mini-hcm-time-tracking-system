@@ -25,3 +25,15 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+
+# firebase
+# ----------------------------
+# Firebase
+# ----------------------------
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# If using emulators
+firebase-export/
+.firebaserc
