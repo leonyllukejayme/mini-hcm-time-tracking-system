@@ -66,9 +66,9 @@ const AdminDashboard = () => {
 			<div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
 				<div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
 					<div>
-						<h3 className="font-black text-lg">Weekly Aggregate Reports</h3>
+						<h3 className="font-black text-lg">Daily Aggregate Reports</h3>
 						<p className="text-sm text-slate-500">
-							Consolidated attendance metrics for the current week
+							Consolidated attendance metrics for the current day
 						</p>
 					</div>
 					<div className="flex items-center gap-2">

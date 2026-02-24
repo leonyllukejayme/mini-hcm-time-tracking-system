@@ -1,7 +1,7 @@
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { useState } from 'react';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { NavLink, useNavigate } from 'react-router';
 import { auth, db } from '../firebase';
 
@@ -37,6 +37,9 @@ export default function Login() {
 
 			if (userDoc.exists() && userDoc.data().role === 'admin') {
 				navigate('/dashboard/admin');
+				toast.success('Login successful!', {
+					position: 'top-right',
+				});
 				return;
 			}
 			toast.success('Login successful!', {
@@ -54,7 +57,6 @@ export default function Login() {
 
 	return (
 		<div className="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display">
-			<Toaster />
 			<main className="flex-1 flex flex-col items-center justify-center p-6">
 				<div className="w-full max-w-110 bg-white dark:bg-slate-900 shadow-xl rounded-xl border border-slate-200 dark:border-slate-800 p-8 md:p-10">
 					{/* Logo Section */}

@@ -106,7 +106,6 @@ const EmployeeDashboard = () => {
 
 	return (
 		<div className="flex-1 overflow-y-auto p-8 space-y-8">
-			<Toaster />
 			<section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				<TimeStatusCard />
 			</section>
@@ -201,11 +200,11 @@ const EmployeeDashboard = () => {
 								))}
 						</tbody>
 					</table>
-					<div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex justify-center">
+					{/* <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex justify-center">
 						<button className="text-slate-500 text-sm font-medium hover:text-primary transition-colors">
 							View All Records
 						</button>
-					</div>
+					</div> */}
 				</div>
 			</section>
 		</div>
