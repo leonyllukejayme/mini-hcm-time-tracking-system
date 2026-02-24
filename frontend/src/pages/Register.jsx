@@ -17,7 +17,7 @@ const [form, setForm] = useState({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const handleChange = (e) => {
 	  setForm({ ...form, [e.target.name]: e.target.value });
 	};
@@ -213,8 +213,9 @@ const [form, setForm] = useState({
 						<div className="pt-4">
 							<button
 								type="submit"
-								className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-md transition-all">
-								Create My Account
+								disabled={loading}
+								className={`w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-md transition-all ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+								{loading ? 'Creating Account...' : 'Create My Account'}
 							</button>
 						</div>
 					</form>

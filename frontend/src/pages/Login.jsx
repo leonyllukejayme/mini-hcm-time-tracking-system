@@ -7,6 +7,7 @@ import { auth, db } from '../firebase';
 
 export default function Login() {
 	const navigate = useNavigate();
+	const [isLoading, setIsLoading] = useState(false);
 	const [form, setForm] = useState({
 		email: '',
 		password: '',
@@ -23,9 +24,9 @@ export default function Login() {
 			[name]: type === 'checkbox' ? checked : value,
 		}));
 	};
-
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+		setIsLoading(true);
 
 		try {
 			const credential = await signInWithEmailAndPassword(
@@ -52,6 +53,8 @@ export default function Login() {
 				position: 'top-right',
 			});
 			// alert("Invalid email or password.");
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -157,8 +160,9 @@ export default function Login() {
 						{/* Submit */}
 						<button
 							type="submit"
-							className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 mt-2">
-							Sign In
+							disabled={isLoading}
+							className={`w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 mt-2 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+							{isLoading ? 'Signing In...' : 'Sign In'}
 						</button>
 					</form>
 
