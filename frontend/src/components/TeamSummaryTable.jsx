@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import EditAttendanceModal from './EditAttendanceModal';
+import Badge from './Badge';
 
-const TeamSummaryTable = ({ employees = []}) => {
+const TeamSummaryTable = ({ employees = [] }) => {
 	const [open, setOpen] = useState(false);
 	const [attendance, setAttendance] = useState(null);
 	const totals = employees.reduce(
@@ -24,15 +25,19 @@ const TeamSummaryTable = ({ employees = []}) => {
 	// });
 
 	return (
+		// TODO: Make it scrollable horizontally inside the table
 		<div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
 			<table className="w-full text-left border-collapse">
 				<thead>
 					<tr className="bg-slate-50 dark:bg-slate-800/50">
 						<th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-							Date
+							Employee
 						</th>
 						<th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-							Employee
+							Time in
+						</th>
+						<th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+							Time out
 						</th>
 						<th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
 							Regular Hrs
@@ -49,6 +54,9 @@ const TeamSummaryTable = ({ employees = []}) => {
 						<th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
 							Undertime
 						</th>
+						<th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+							Status
+						</th>
 						<th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">
 							Actions
 						</th>
@@ -60,9 +68,6 @@ const TeamSummaryTable = ({ employees = []}) => {
 						<tr
 							key={emp.id}
 							className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
-							<td className="px-6 py-4 text-sm font-medium">
-								2026-09-15
-							</td>
 							<td className="px-6 py-4">
 								<div className="flex items-center gap-3">
 									<div className="size-9 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
@@ -79,6 +84,14 @@ const TeamSummaryTable = ({ employees = []}) => {
 										</p>
 									</div>
 								</div>
+							</td>
+
+							<td className="px-6 py-4 text-sm font-medium">
+								2026-09-15 09:00 AM
+							</td>
+
+							<td className="px-6 py-4 text-sm font-medium">
+								2026-09-15 06:00 PM
 							</td>
 
 							<td className="px-6 py-4 text-sm font-medium">
@@ -101,6 +114,10 @@ const TeamSummaryTable = ({ employees = []}) => {
 								{emp.undertime.toFixed(2)}
 							</td>
 
+							<td className="px-6 py-4 text-sm font-medium">
+								<Badge title={'On Time'} />
+							</td>
+
 							<td className="px-6 py-4 text-right">
 								<button
 									onClick={() => setOpen(true)}
@@ -113,16 +130,18 @@ const TeamSummaryTable = ({ employees = []}) => {
 									attendance={attendance}
 									employee={employees.find((e) => e.id === emp.id)}
 									onSave={(data) => {
-										console.log('Edited attendance:', data);}}
+										console.log('Edited attendance:', data);
+									}}
 								/>
 							</td>
 						</tr>
 					))}
 				</tbody>
 
-				<tfoot className="bg-slate-50 dark:bg-slate-800/50">
+				{/* <tfoot className="bg-slate-50 dark:bg-slate-800/50">
 					<tr className="font-bold text-slate-900 dark:text-white">
 						<td className="px-6 py-4 text-sm">Team Totals</td>
+						<td className="px-6 py-4 text-sm"></td>
 						<td className="px-6 py-4 text-sm"></td>
 						<td className="px-6 py-4 text-sm">{totals.regular.toFixed(2)}</td>
 						<td className="px-6 py-4 text-sm">{totals.ot.toFixed(2)}</td>
@@ -133,7 +152,7 @@ const TeamSummaryTable = ({ employees = []}) => {
 						</td>
 						<td className="px-6 py-4 text-right"></td>
 					</tr>
-				</tfoot>
+				</tfoot> */}
 			</table>
 		</div>
 	);

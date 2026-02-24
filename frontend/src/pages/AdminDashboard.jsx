@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import KPICard from '../components/KPICard';
 import TeamSummaryTable from '../components/TeamSummaryTable';
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from '../firebase';
 
 const AdminDashboard = () => {
 	const employees = [
@@ -33,6 +35,23 @@ const AdminDashboard = () => {
 
 	useEffect(() => {
 		document.title = 'Admin Dashboard - MCM Time Tracking';
+	}, []);
+
+	useEffect(() => {
+		const fetchUserRole = async () => {
+			const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+			console.log(userDoc.data());
+		};
+		fetchUserRole();
+
+		const fetchDailySummary = async () => {
+			// Placeholder for fetching daily summary data from Firestore
+			// You would typically query a collection that stores daily summaries
+			// and set it to state to display in the dashboard
+		};
+		fetchDailySummary();
+
+
 	}, []);
 	return (
 		<div className="flex-1 overflow-y-auto p-8 space-y-8">

@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from 'react';
 import Badge from '../components/Badge';
 import SummaryCard from '../components/SummaryCard';
 import TimeStatusCard from '../components/TimeStatusCard';
-import { Toaster } from 'react-hot-toast';
 
 const ATTENDANCE_UPDATED_EVENT = 'attendance:updated';
 
