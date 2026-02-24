@@ -24,6 +24,31 @@ router.get('/daily-reports/:date', verifyToken, isAdmin, async (req, res) => {
 	}
 });
 
+router.get('/daily-reports/month/:month', verifyToken, isAdmin, async (req, res) => {
+	try {
+		const month = req.params.month;
+		const currentYear = dayjs().year();
+		if (!dayjs(month, 'YYYY-MM', true).isValid()) {
+			return res.status(400).json({ error: 'Invalid month format. Use YYYY-MM.' });
+		}
+
+		const startDate = `${currentYear}-${month}-01`;
+		const endDate = dayjs(startDate).add(1, 'month').format('YYYY-MM-DD');
+
+		const snapshot = await db
+			.collection('dailySummary')
+			.where('date', '>=', startDate)
+			.where('date', '<', endDate)
+			.orderBy('date', 'asc')
+			.get();
+
+		const results = snapshot.docs.map((doc) => doc.data());
+		return res.json(results);
+	} catch (error) {
+		return res.status(500).json({ error: error.message });
+	}
+});
+
 router.get('/punches', verifyToken, isAdmin, async (req, res) => {
 	try {
 		const snapshot = await db.collection('attendance').get();
