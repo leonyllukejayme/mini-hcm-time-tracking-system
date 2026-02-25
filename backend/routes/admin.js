@@ -28,21 +28,56 @@ router.get('/daily-reports/month/:month', verifyToken, isAdmin, async (req, res)
 	try {
 		const month = req.params.month;
 		const currentYear = dayjs().year();
-		if (!dayjs(month, 'YYYY-MM', true).isValid()) {
-			return res.status(400).json({ error: 'Invalid month format. Use YYYY-MM.' });
+		if (!dayjs(`${currentYear}-${month}`, 'YYYY-MM', true).isValid()) {
+			return res.status(400).json({ error: 'Invalid month format. Use MM.' });
 		}
 
 		const startDate = `${currentYear}-${month}-01`;
 		const endDate = dayjs(startDate).add(1, 'month').format('YYYY-MM-DD');
 
-		const snapshot = await db
+		const summarySnapshot = await db
 			.collection('dailySummary')
 			.where('date', '>=', startDate)
 			.where('date', '<', endDate)
 			.orderBy('date', 'asc')
 			.get();
 
-		const results = snapshot.docs.map((doc) => doc.data());
+		const attendanceSnapshot = await db
+			.collection('attendance')
+			.where('date', '>=', startDate)
+			.where('date', '<', endDate)
+			.get();
+
+		const attendanceById = new Map();
+		for (const attendanceDoc of attendanceSnapshot.docs) {
+			const attendanceData = attendanceDoc.data();
+			const timeInValue = attendanceData?.timeIn;
+			const timeOutValue = attendanceData?.timeOut;
+			const timeIn = timeInValue?.toDate
+				? timeInValue.toDate().toISOString()
+				: timeInValue
+					? new Date(timeInValue).toISOString()
+					: null;
+			const timeOut = timeOutValue?.toDate
+				? timeOutValue.toDate().toISOString()
+				: timeOutValue
+					? new Date(timeOutValue).toISOString()
+					: null;
+
+			attendanceById.set(attendanceDoc.id, { timeIn, timeOut });
+		}
+
+		const results = [];
+		for (const summaryDoc of summarySnapshot.docs) {
+			const summaryData = summaryDoc.data();
+			const attendanceData = attendanceById.get(summaryDoc.id);
+			results.push({
+				id: summaryDoc.id,
+				...summaryData,
+				timeIn: attendanceData?.timeIn || null,
+				timeOut: attendanceData?.timeOut || null,
+			});
+		}
 		return res.json(results);
 	} catch (error) {
 		return res.status(500).json({ error: error.message });
@@ -52,6 +87,15 @@ router.get('/daily-reports/month/:month', verifyToken, isAdmin, async (req, res)
 router.get('/punches', verifyToken, isAdmin, async (req, res) => {
 	try {
 		const snapshot = await db.collection('attendance').get();
+		const results = snapshot.docs.map((doc) => doc.data());
+		res.json(results);
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+});
+router.get('/users', verifyToken, isAdmin, async (req, res) => {
+	try {
+		const snapshot = await db.collection('users').where('role', '==', 'employee').get();
 		const results = snapshot.docs.map((doc) => doc.data());
 		res.json(results);
 	} catch (error) {
