@@ -1,84 +1,98 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import KPICard from '../components/KPICard';
 import TeamSummaryTable from '../components/TeamSummaryTable';
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from '../firebase';
+import { useDailySummary } from '../hooks/useDailySummary';
 
 const AdminDashboard = () => {
-	const employees = [
-		{
-			id: 1,
-			name: 'John Doe',
-			employeeId: 'EMP-001',
-			avatar: 'https://i.pravatar.cc/150?img=1',
-			regularHours: 40,
-			overtime: 4.5,
-			nightDiff: 0,
-			lateMinutes: 12,
-			undertime: 0,
+	// Backend URL is injected from env so this page can run across deployments.
+	const apiBaseUrl = import.meta.env.VITE_BACKEND_URL || '';
+	const { employees, isLoading, refetchDailySummary } = useDailySummary(apiBaseUrl);
+	const [searchEmployee, setSearchEmployee] = useState('');
+	const [currentPage, setCurrentPage] = useState(1);
+	const pageSize = 5;
+	// Filter by name or employee ID using a case-insensitive query.
+	const filteredEmployees = useMemo(() => {
+		const query = searchEmployee.trim().toLowerCase();
+		if (!query) return employees ?? [];
+		return (employees ?? []).filter((employee) => {
+			const name = String(employee?.name ?? '').toLowerCase();
+			const employeeId = String(employee?.employeeId ?? '').toLowerCase();
+			return name.includes(query) || employeeId.includes(query);
+		});
+	}, [employees, searchEmployee]);
+	const totalEmployees = filteredEmployees.length;
+	const totalPages = Math.max(1, Math.ceil(totalEmployees / pageSize));
+	const startIndex = (currentPage - 1) * pageSize;
+	const endIndex = Math.min(startIndex + pageSize, totalEmployees);
+	const paginatedEmployees = filteredEmployees.slice(startIndex, endIndex);
+	// KPI values are computed from the filtered list so cards match table results.
+	const { presentEmployees, lateEmployees, onTimeEmployees } = filteredEmployees.reduce(
+		(acc, employee) => {
+			const isPresent = Boolean(employee?.timeIn) && employee.timeIn !== '--';
+			if (!isPresent) return acc;
+			acc.presentEmployees += 1;
+			const isLate = Number(employee?.lateMinutes || 0) > 0;
+			if (isLate) {
+				acc.lateEmployees += 1;
+			} else {
+				acc.onTimeEmployees += 1;
+			}
+			return acc;
 		},
-		{
-			id: 2,
-			name: 'John Doe',
-			employeeId: 'EMP-001',
-			avatar: 'https://i.pravatar.cc/150?img=1',
-			regularHours: 40,
-			overtime: 4.5,
-			nightDiff: 0,
-			lateMinutes: 12,
-			undertime: 0,
-		},
-	];
-	const handleEdit = (employee) => {
-		console.log('Edit punches for:', employee);
+		{ presentEmployees: 0, lateEmployees: 0, onTimeEmployees: 0 },
+	);
+	const handleEdit = async () => {
+		await refetchDailySummary();
 	};
+	
+	
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
+		setCurrentPage((prevPage) => Math.min(prevPage, totalPages));
+	}, [totalPages]);
 
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
+		setCurrentPage(1);
+	}, [searchEmployee]);
+	
 	useEffect(() => {
 		document.title = 'Admin Dashboard - MCM Time Tracking';
-	}, []);
-
-	useEffect(() => {
-		const fetchUserRole = async () => {
-			const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
-			console.log(userDoc.data());
-		};
-		fetchUserRole();
-
-		const fetchDailySummary = async () => {
-			// Placeholder for fetching daily summary data from Firestore
-			// You would typically query a collection that stores daily summaries
-			// and set it to state to display in the dashboard
-		};
-		fetchDailySummary();
-
-
 	}, []);
 	return (
 		<div className="flex-1 overflow-y-auto p-8 space-y-8">
 			{/* KPI Cards */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-				<KPICard
-					title={'Total Employees'}
-					value={'1,248'}
-					icon={'groups'}
-					classNameName={'p-2 bg-primary/10 rounded-lg text-primary'}
-				/>
-				<KPICard
-					title={'Present Today'}
-					value={'1,102'}
-					icon={'how_to_reg'}
-					classNameName={
-						'p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600'
-					}
-				/>
-				<KPICard
-					title={'Late Today'}
-					value={'14'}
-					icon={'schedule'}
-					classNameName={
-						'p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600'
-					}
-				/>
+					<KPICard
+						title={'Total Employees'}
+						value={totalEmployees.toLocaleString()}
+						icon={'groups'}
+						classNameName={'p-2 bg-primary/10 rounded-lg text-primary'}
+					/>
+					<KPICard
+						title={'Present Today'}
+						value={presentEmployees.toLocaleString()}
+						icon={'how_to_reg'}
+						classNameName={
+							'p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600'
+						}
+					/>
+					<KPICard
+						title={'Late Today'}
+						value={lateEmployees.toLocaleString()}
+						icon={'schedule'}
+						classNameName={
+							'p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600'
+						}
+					/>
+					<KPICard
+						title={'On-	Time Today'}
+						value={onTimeEmployees.toLocaleString()}
+						icon={'schedule'}
+						classNameName={
+							'p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600'
+						}
+					/>
 				{/* Add more KPI cards as needed */}
 			</div>
 			{/* table */}
@@ -99,31 +113,46 @@ const AdminDashboard = () => {
 								className="pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary w-64"
 								placeholder="Search employee..."
 								type="text"
+								value={searchEmployee}
+								onChange={(event) => setSearchEmployee(event.target.value)}
 							/>
 						</div>
-						<button className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+						{/* <button className="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
 							<span className="material-symbols-outlined text-slate-600 dark:text-slate-400">
 								filter_list
 							</span>
-						</button>
+						</button> */}
 					</div>
 				</div>
 				<div className="overflow-x-auto">
-					<TeamSummaryTable employees={employees} onEdit={handleEdit} />
+					{isLoading ? (
+						<div className="p-6 text-sm text-slate-500">Loading daily summary...</div>
+					) : (
+						<TeamSummaryTable employees={paginatedEmployees} onEdit={handleEdit} />
+					)}
 				</div>
-				<div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-					<p className="text-xs text-slate-500 font-medium">
-						Showing 4 of 1,248 entries
-					</p>
-					<div className="flex gap-2">
-						<button className="px-3 py-1 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800">
-							Previous
-						</button>
-						<button className="px-3 py-1 bg-primary text-white rounded-md text-xs font-bold shadow-sm">
-							Next
-						</button>
+					<div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+						<p className="text-xs text-slate-500 font-medium">
+							Showing {totalEmployees === 0 ? 0 : startIndex + 1}-{endIndex} of{' '}
+							{totalEmployees.toLocaleString()} entries
+						</p>
+						<div className="flex gap-2">
+							<button
+								disabled={currentPage === 1}
+								onClick={() => setCurrentPage((prevPage) => Math.max(1, prevPage - 1))}
+								className="px-3 py-1 border border-slate-200 dark:border-slate-700 rounded-md text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed">
+								Previous
+							</button>
+							<button
+								disabled={currentPage === totalPages}
+								onClick={() =>
+									setCurrentPage((prevPage) => Math.min(totalPages, prevPage + 1))
+								}
+								className="px-3 py-1 bg-primary text-white rounded-md text-xs font-bold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+								Next
+							</button>
+						</div>
 					</div>
-				</div>
 			</div>
 		</div>
 	);

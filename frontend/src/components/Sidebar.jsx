@@ -13,14 +13,14 @@ const Sidebar = ({ role = 'employee' }) => {
 	const navLinks = isAdmin
 		? [
 				{ name: 'Dashboard', icon: 'dashboard', path: '/admin/dashboard' },
-				{ name: 'Employee List', icon: 'badge', path: '/admin/employees' },
+				// { name: 'Employee List', icon: 'badge', path: '/admin/employees' },
 				{ name: 'Reports', icon: 'bar_chart', path: '/admin/reports' },
 				{ name: 'Settings', icon: 'settings', path: '/admin/settings' },
 			]
 			: [
-				{ name: 'Dashboard', icon: 'dashboard', path: '/dashboard' },
-				{ name: 'Reports', icon: 'bar_chart', path: '/reports' },
-				{ name: 'Settings', icon: 'settings', path: '/settings' },
+				{ name: 'Dashboard', icon: 'dashboard', path: '/employee/dashboard' },
+				// { name: 'Reports', icon: 'bar_chart', path: '/employee/reports' },
+				{ name: 'Settings', icon: 'settings', path: '/employee/settings' },
 
 				// {
 				// 	name: 'My Attendance',

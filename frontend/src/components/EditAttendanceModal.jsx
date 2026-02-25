@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 export default function EditAttendanceModal({
 	isOpen,
@@ -14,6 +16,8 @@ export default function EditAttendanceModal({
 		clockOutTime: '',
 		reason: 'forgot',
 	});
+	const [isSaving, setIsSaving] = useState(false);
+
 
 	// Populate form when modal opens
 	useEffect(() => {
@@ -31,14 +35,45 @@ export default function EditAttendanceModal({
 
 	if (!isOpen) return null;
 
+
+	
 	const handleChange = (e) => {
 		setForm({ ...form, [e.target.name]: e.target.value });
 	};
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		onSave(form);
-		onClose();
+		if (isSaving) return;
+		setIsSaving(true);
+		const token = localStorage.getItem('token');
+		const apiBaseUrl = import.meta.env.VITE_BACKEND_URL || '';
+		const punchId = employee?.id || attendance?.id;
+		if (!token || !punchId) {
+			setIsSaving(false);
+			return;
+		}
+		try {
+			const response = await axios.put(
+				`${apiBaseUrl}/api/admin/punches/${punchId}`,
+				{
+					time_in: `${form.clockInDate}T${form.clockInTime}+08:00`,
+					time_out: `${form.clockOutDate}T${form.clockOutTime}+08:00`,
+				},
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
+			toast.success(response?.data?.message || 'Attendance updated successfully.', {
+				position: 'top-right',
+			});
+
+			onSave(form);
+			onClose();
+		} finally {
+			setIsSaving(false);
+		}
 	};
 
 	return (
@@ -161,7 +196,8 @@ export default function EditAttendanceModal({
 
 						<button
 							type="submit"
-							className="px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-lg shadow-md hover:bg-primary/90 hover:shadow-lg transition-all transform active:scale-95">
+							disabled={isSaving}
+							className="px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-lg shadow-md hover:bg-primary/90 hover:shadow-lg transition-all transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none">
 							Save Changes
 						</button>
 					</div>

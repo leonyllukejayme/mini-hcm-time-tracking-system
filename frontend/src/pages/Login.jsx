@@ -1,19 +1,55 @@
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { NavLink, useNavigate } from 'react-router';
+import { useAuth } from '../context/AuthContext';
 import { auth, db } from '../firebase';
 
 export default function Login() {
 	const navigate = useNavigate();
+	const { user, loading } = useAuth();
 	const [isLoading, setIsLoading] = useState(false);
+	const [isCheckingSession, setIsCheckingSession] = useState(true);
 	const [form, setForm] = useState({
 		email: '',
 		password: '',
 	});
 
 	const [showPassword, setShowPassword] = useState(false);
+
+	useEffect(() => {
+		let isMounted = true;
+
+		const redirectIfLoggedIn = async () => {
+			if (loading) return;
+
+			if (!user) {
+				if (isMounted) setIsCheckingSession(false);
+				return;
+			}
+
+			try {
+				const userDoc = await getDoc(doc(db, 'users', user.uid));
+				if (!isMounted) return;
+
+				if (userDoc.exists() && userDoc.data().role === 'admin') {
+					navigate('/admin/dashboard', { replace: true });
+					return;
+				}
+
+				navigate('/employee/dashboard', { replace: true });
+			} finally {
+				if (isMounted) setIsCheckingSession(false);
+			}
+		};
+
+		redirectIfLoggedIn();
+
+		return () => {
+			isMounted = false;
+		};
+	}, [loading, user, navigate]);
 
 	// Handles input changes for email, password, and remember fields
 	const handleChange = (e) => {
@@ -57,6 +93,14 @@ export default function Login() {
 			setIsLoading(false);
 		}
 	};
+
+		if (loading || isCheckingSession) {
+			return (
+				<div className="text-slate-500">
+					Loading...
+				</div>
+			);
+		}
 
 	return (
 		<div className="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display">

@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ProtectedRoute from './ProtectedRoute';
 import Settings from './pages/Settings';
+import Reports from './pages/Reports';
 
 function App() {
 	return (
@@ -24,6 +25,7 @@ function App() {
 						</ProtectedRoute>
 					}>
 					<Route path='dashboard' element={<AdminDashboard />} />
+					<Route path='reports' element={<Reports />} />
 					<Route path="settings" element={<Settings />} />
 				</Route>
 				<Route

@@ -2,32 +2,59 @@ import { useState } from 'react';
 import EditAttendanceModal from './EditAttendanceModal';
 import Badge from './Badge';
 
-const TeamSummaryTable = ({ employees = [] }) => {
+const TeamSummaryTable = ({ employees = [], onEdit }) => {
 	const [open, setOpen] = useState(false);
+	const [selectedEmployee, setSelectedEmployee] = useState(null);
 	const [attendance, setAttendance] = useState(null);
+
+	const formatDateTime = (value) => {
+		if (!value) return '--';
+		const date = new Date(value);
+		if (Number.isNaN(date.getTime())) return '--';	
+		return date.toLocaleString([], {
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit',
+			hour: '2-digit',
+			minute: '2-digit',
+		});
+	};
+	const getStatus = (employee) => {
+		if (employee?.status) return employee.status;
+		return Number(employee?.lateMinutes || 0) > 0 ? 'Late' : 'On Time';
+	};
+
+	const handleOpenModal = (employee) => {
+		setSelectedEmployee(employee);
+		setAttendance({
+			clockInDate: employee?.timeIn ? new Date(employee.timeIn).toISOString().slice(0, 10) : '',
+			clockInTime: employee?.timeIn ? new Date(employee.timeIn).toTimeString().slice(0, 5) : '',
+			clockOutDate: employee?.timeOut
+				? new Date(employee.timeOut).toISOString().slice(0, 10)
+				: '',
+			clockOutTime: employee?.timeOut
+				? new Date(employee.timeOut).toTimeString().slice(0, 5)
+				: '',
+			dateLabel: employee?.date || '--',
+		});
+		setOpen(true);
+	};
+
 	const totals = employees.reduce(
 		(acc, emp) => {
-			acc.regular += emp.regularHours;
-			acc.ot += emp.overtime;
-			acc.nd += emp.nightDiff;
-			acc.late += emp.lateMinutes;
-			acc.undertime += emp.undertime;
+			acc.regular += Number(emp?.regularHours || 0);
+			acc.ot += Number(emp?.overtime || 0);
+			acc.nd += Number(emp?.nightDiff || 0);
+			acc.late += Number(emp?.lateMinutes || 0);
+			acc.undertime += Number(emp?.undertime || 0);
 			return acc;
 		},
 		{ regular: 0, ot: 0, nd: 0, late: 0, undertime: 0 },
 	);
-	// setAttendance({
-	// 	clockInDate: '',
-	// 	clockInTime: '',
-	// 	clockOutDate: '',
-	// 	clockOutTime: '',
-	// 	reason: 'forgot',
-	// });
 
 	return (
-		// TODO: Make it scrollable horizontally inside the table
 		<div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-			<table className="w-full text-left border-collapse">
+			<table className="w-full min-w-275 text-left border-collapse">
 				<thead>
 					<tr className="bg-slate-50 dark:bg-slate-800/50">
 						<th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -64,6 +91,13 @@ const TeamSummaryTable = ({ employees = [] }) => {
 				</thead>
 
 				<tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+					{employees.length === 0 && (
+						<tr>
+							<td className="px-6 py-8 text-sm text-slate-500" colSpan={10}>
+								No daily summary records found.
+							</td>
+						</tr>
+					)}
 					{employees.map((emp) => (
 						<tr
 							key={emp.id}
@@ -71,11 +105,11 @@ const TeamSummaryTable = ({ employees = [] }) => {
 							<td className="px-6 py-4">
 								<div className="flex items-center gap-3">
 									<div className="size-9 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-										<img
+										{/* <img
 											src={emp.avatar}
 											alt={emp.name}
 											className="w-full h-full object-cover"
-										/>
+										/> */}
 									</div>
 									<div>
 										<p className="text-sm font-bold">{emp.name}</p>
@@ -87,58 +121,49 @@ const TeamSummaryTable = ({ employees = [] }) => {
 							</td>
 
 							<td className="px-6 py-4 text-sm font-medium">
-								2026-09-15 09:00 AM
+								{formatDateTime(emp.timeIn)}
 							</td>
 
 							<td className="px-6 py-4 text-sm font-medium">
-								2026-09-15 06:00 PM
+								{formatDateTime(emp.timeOut)}
 							</td>
 
 							<td className="px-6 py-4 text-sm font-medium">
-								{emp.regularHours.toFixed(2)}
+								{Number(emp.regularHours || 0).toFixed(2)}
 							</td>
 
 							<td className="px-6 py-4 text-sm font-medium text-primary">
-								{emp.overtime.toFixed(2)}
+								{Number(emp.overtime || 0).toFixed(2)}
 							</td>
 
 							<td className="px-6 py-4 text-sm font-medium">
-								{emp.nightDiff.toFixed(2)}
+								{Number(emp.nightDiff || 0).toFixed(2)}
 							</td>
 
 							<td className="px-6 py-4 text-sm font-bold text-rose-500">
-								{emp.lateMinutes}
+								{Number(emp.lateMinutes || 0)}
 							</td>
 
 							<td className="px-6 py-4 text-sm font-medium text-slate-400">
-								{emp.undertime.toFixed(2)}
+								{Number(emp.undertime || 0).toFixed(2)}
 							</td>
 
 							<td className="px-6 py-4 text-sm font-medium">
-								<Badge title={'On Time'} />
+								<Badge title={getStatus(emp)} />
 							</td>
 
 							<td className="px-6 py-4 text-right">
 								<button
-									onClick={() => setOpen(true)}
+									onClick={() => handleOpenModal(emp)}
 									className="text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-md hover:bg-primary/20 transition-colors">
 									Edit Punches
 								</button>
-								<EditAttendanceModal
-									isOpen={open}
-									onClose={() => setOpen(false)}
-									attendance={attendance}
-									employee={employees.find((e) => e.id === emp.id)}
-									onSave={(data) => {
-										console.log('Edited attendance:', data);
-									}}
-								/>
 							</td>
 						</tr>
 					))}
 				</tbody>
 
-				{/* <tfoot className="bg-slate-50 dark:bg-slate-800/50">
+				<tfoot className="bg-slate-50 dark:bg-slate-800/50">
 					<tr className="font-bold text-slate-900 dark:text-white">
 						<td className="px-6 py-4 text-sm">Team Totals</td>
 						<td className="px-6 py-4 text-sm"></td>
@@ -152,8 +177,19 @@ const TeamSummaryTable = ({ employees = [] }) => {
 						</td>
 						<td className="px-6 py-4 text-right"></td>
 					</tr>
-				</tfoot> */}
+				</tfoot>
 			</table>
+			<EditAttendanceModal
+				isOpen={open}
+				onClose={() => setOpen(false)}
+				attendance={attendance}
+				employee={selectedEmployee}
+				onSave={(data) => {
+					if (typeof onEdit === 'function') {
+						onEdit({ employee: selectedEmployee, attendance: data });
+					}
+				}}
+			/>
 		</div>
 	);
 };

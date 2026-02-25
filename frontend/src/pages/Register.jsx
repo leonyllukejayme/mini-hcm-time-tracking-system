@@ -1,5 +1,5 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, limit, query, setDoc, where } from 'firebase/firestore';
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 import { auth, db } from '../firebase';
@@ -10,6 +10,7 @@ const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
+	role:"",
 	shiftStart: "09:00",
 	shiftEnd: "18:00",
   });
@@ -29,6 +30,19 @@ const [form, setForm] = useState({
     setLoading(true);
 
     try {
+      if (form.role === "admin") {
+        const adminQuery = query(
+          collection(db, "users"),
+          where("role", "==", "admin"),
+          limit(1)
+        );
+        const adminSnapshot = await getDocs(adminQuery);
+
+        if (!adminSnapshot.empty) {
+          throw new Error("An admin account already exists.");
+        }
+      }
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         form.email,
@@ -41,7 +55,7 @@ const [form, setForm] = useState({
         uid: user.uid,
         name: form.name,
         email: form.email,
-        role: "employee",
+        role: form.role,
         timezone: "Asia/Manila",
         schedule: {
           start: form.shiftStart,
@@ -51,11 +65,12 @@ const [form, setForm] = useState({
       });
 
       toast.success("Registration successful!",{position: "top-right"});
-      setForm({ name: "", email: "", password: "", shiftStart: "09:00", shiftEnd: "18:00"});
+      setForm({ name: "", email: "", password: "", role:"", shiftStart: "09:00", shiftEnd: "18:00"});
 	  navigate("/");
     } catch (err) {
       console.error(err);
       setError(err.message);
+	  toast.error(error,{position:"top-right"})
     }
 
     setLoading(false);
