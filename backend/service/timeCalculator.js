@@ -4,7 +4,7 @@ import utc from 'dayjs/plugin/utc.js'
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
+const toManilaISOString = (time) => dayjs.tz(time, 'Asia/Manila').toISOString();
 /**
  * Calculates work hours including regular, overtime, late, undertime, and night differential hours.
  * @param {string} timeIn - Clock-in time
@@ -14,8 +14,8 @@ dayjs.extend(timezone);
  * @returns {Object} Object containing totalWorkedHours, regularHours, overtimeHours, nightDiffHours, lateMinutes, undertimeMinutes
  */
 function calculateHours(timeIn, timeOut, scheduleStart, scheduleEnd) {
-	const start = dayjs(timeIn);
-	const end = dayjs(timeOut);
+	const start = dayjs(toManilaISOString(timeIn));
+	const end = dayjs(toManilaISOString(timeOut));
 
 	// Create shift boundaries using the same date as the clock-in time
 	const shiftStart = dayjs(start.format('YYYY-MM-DD') + ' ' + scheduleStart);
