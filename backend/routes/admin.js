@@ -106,8 +106,18 @@ router.get('/users', verifyToken, isAdmin, async (req, res) => {
 router.put('/punches/:id', verifyToken, isAdmin, async (req, res) => {
 	try {
 		const { time_in, time_out } = req.body;
-		const timeInTimestamp = dayjs(time_in).toDate();
-		const timeOutTimestamp = dayjs(time_out).toDate();
+		const parseTimeInput = (value) => {
+			if (
+				process.env.VERCEL &&
+				typeof value === 'string' &&
+				!/[zZ]|[+-]\d{2}:?\d{2}$/.test(value)
+			) {
+				return dayjs(`${value}+08:00`).toDate();
+			}
+			return dayjs(value).toDate();
+		};
+		const timeInTimestamp = parseTimeInput(time_in);
+		const timeOutTimestamp = parseTimeInput(time_out);
 
 		// const doc = await db.collection('attendance').doc(req.params.id).get();
 		// if (!doc.exists) {
