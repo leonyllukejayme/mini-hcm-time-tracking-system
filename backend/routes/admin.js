@@ -112,8 +112,8 @@ router.get('/users', verifyToken, isAdmin, async (req, res) => {
 router.put('/punches/:id', verifyToken, isAdmin, async (req, res) => {
 	try {
 		const { time_in, time_out } = req.body;
-		const timeInTimestamp = dayjs(time_in).utc().tz(MANILA_TZ);
-		const timeOutTimestamp = dayjs(time_out).utc().tz(MANILA_TZ);
+		const timeInTimestamp = dayjs(time_in).utc().tz(MANILA_TZ).format();
+		const timeOutTimestamp = dayjs(time_out).utc().tz(MANILA_TZ).format();
 
 
 		// const doc = await db.collection('attendance').doc(req.params.id).get();
