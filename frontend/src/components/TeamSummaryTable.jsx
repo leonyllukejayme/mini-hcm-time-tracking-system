@@ -94,7 +94,7 @@ const TeamSummaryTable = ({ employees = [], onEdit }) => {
 					{employees.length === 0 && (
 						<tr>
 							<td className="px-6 py-8 text-sm text-slate-500" colSpan={10}>
-								No daily summary records found.
+								No Attendance records found.
 							</td>
 						</tr>
 					)}

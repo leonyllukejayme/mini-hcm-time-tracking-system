@@ -24,7 +24,15 @@ const AdminDashboard = () => {
 	const totalPages = Math.max(1, Math.ceil(totalEmployees / pageSize));
 	const startIndex = (currentPage - 1) * pageSize;
 	const endIndex = Math.min(startIndex + pageSize, totalEmployees);
-	const paginatedEmployees = filteredEmployees.slice(startIndex, endIndex);
+	// Paginated Employees
+	const paginatedEmployees = filteredEmployees.slice(startIndex, endIndex).map((employee) => {
+		// if has time out
+		const hasTimeOut = Boolean(employee?.timeOut) && employee.timeOut !== '--';
+		if (!hasTimeOut) {
+			return { ...employee, status: 'In Progress' };
+		}
+		return employee;
+	});
 	// KPI values are computed from the filtered list so cards match table results.
 	const { presentEmployees, lateEmployees, onTimeEmployees } = filteredEmployees.reduce(
 		(acc, employee) => {
@@ -99,10 +107,7 @@ const AdminDashboard = () => {
 			<div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
 				<div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
 					<div>
-						<h3 className="font-black text-lg">Daily Aggregate Reports</h3>
-						<p className="text-sm text-slate-500">
-							Consolidated attendance metrics for the current day
-						</p>
+						<h3 className="font-black text-lg">Attndance list</h3>
 					</div>
 					<div className="flex items-center gap-2">
 						<div className="relative">
@@ -126,7 +131,7 @@ const AdminDashboard = () => {
 				</div>
 				<div className="overflow-x-auto">
 					{isLoading ? (
-						<div className="p-6 text-sm text-slate-500">Loading daily summary...</div>
+						<div className="p-6 text-sm text-slate-500">Loading Attendance List...</div>
 					) : (
 						<TeamSummaryTable employees={paginatedEmployees} onEdit={handleEdit} />
 					)}
