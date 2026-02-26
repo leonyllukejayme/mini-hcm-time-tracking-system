@@ -1,5 +1,7 @@
 import axios from 'axios';
 import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone.js'
+import utc from 'dayjs/plugin/utc.js'
 import dotenv from 'dotenv';
 import express from 'express';
 import { admin, db } from '../config/firebase.js';
@@ -8,6 +10,12 @@ import verifyToken from '../middleware/auth.js';
 import { calculateHours } from '../service/timeCalculator.js';
 dotenv.config({ quiet: true });
 const router = express.Router();
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const APP_TIMEZONE = process.env.APP_TIMEZONE || process.env.TZ || 'Asia/Manila';
+dayjs.tz.setDefault(APP_TIMEZONE);
 
 // Admin routes for attendance management
 
@@ -106,8 +114,9 @@ router.get('/users', verifyToken, isAdmin, async (req, res) => {
 router.put('/punches/:id', verifyToken, isAdmin, async (req, res) => {
 	try {
 		const { time_in, time_out } = req.body;
-		const timeInTimestamp = dayjs(time_in).toDate();
-		const timeOutTimestamp = dayjs(time_out).toDate();
+		const timeInTimestamp = dayjs.tz(dayjs(time_in).utc().format(),APP_TIMEZONE);
+		const timeOutTimestamp = dayjs.tz(dayjs(time_out).utc().format(),APP_TIMEZONE);
+
 
 		// const doc = await db.collection('attendance').doc(req.params.id).get();
 		// if (!doc.exists) {
