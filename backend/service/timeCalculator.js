@@ -4,7 +4,7 @@ import utc from 'dayjs/plugin/utc.js'
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-const toManilaISOString = (time) => dayjs.tz(time, 'Asia/Manila').toISOString();
+const toManilaISOString = (time) => dayjs(time).tz('Asia/Manila').format();
 /**
  * Calculates work hours including regular, overtime, late, undertime, and night differential hours.
  * @param {string} timeIn - Clock-in time
