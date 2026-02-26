@@ -13,10 +13,6 @@ const router = express.Router();
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-
-const APP_TIMEZONE = process.env.APP_TIMEZONE || process.env.TZ || 'Asia/Manila';
-dayjs.tz.setDefault(APP_TIMEZONE);
-
 // Admin routes for attendance management
 
 router.get('/daily-reports/:date', verifyToken, isAdmin, async (req, res) => {
@@ -114,8 +110,8 @@ router.get('/users', verifyToken, isAdmin, async (req, res) => {
 router.put('/punches/:id', verifyToken, isAdmin, async (req, res) => {
 	try {
 		const { time_in, time_out } = req.body;
-		const timeInTimestamp = dayjs.tz(dayjs(time_in).utc().format(),APP_TIMEZONE);
-		const timeOutTimestamp = dayjs.tz(dayjs(time_out).utc().format(),APP_TIMEZONE);
+		const timeInTimestamp = dayjs(time_in).toDate().toISOString();
+		const timeOutTimestamp = dayjs(time_out).toDate().toISOString();
 
 
 		// const doc = await db.collection('attendance').doc(req.params.id).get();

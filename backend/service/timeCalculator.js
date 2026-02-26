@@ -5,7 +5,6 @@ import utc from 'dayjs/plugin/utc.js'
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-// TODO: make the timezone from local and vercel  deployment are same.
 /**
  * Calculates work hours including regular, overtime, late, undertime, and night differential hours.
  * @param {string} timeIn - Clock-in time
