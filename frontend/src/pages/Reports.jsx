@@ -1,5 +1,49 @@
 import axios from 'axios';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
+
+const METRIC_DEFINITIONS = [
+	{
+		key: 'regular',
+		label: 'Regular (min)',
+		color: '#2563eb',
+		group: 'hours',
+	},
+	{
+		key: 'overtime',
+		label: 'Overtime (min)',
+		color: '#0ea5e9',
+		group: 'hours',
+	},
+	{
+		key: 'late',
+		label: 'Total Late (min)',
+		color: '#f59e0b',
+		group: 'attendance',
+	},
+	{
+		key: 'undertime',
+		label: 'Undertime (min)',
+		color: '#ef4444',
+		group: 'attendance',
+	},
+];
+
+function SummaryCard({ label, value, unit }) {
+	return (
+		<div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+			<p className="text-slate-500 text-sm font-medium">{label}</p>
+			<div className="flex items-baseline gap-2 mt-1">
+				<h3 className="text-2xl font-bold">
+					{value}
+					{unit}
+				</h3>
+			</div>
+		</div>
+	);
+}
 
 export default function Reports() {
 	// ==============================
@@ -7,11 +51,16 @@ export default function Reports() {
 	// ==============================
 	const [activeTab, setActiveTab] = useState('daily');
 	const [search, setSearch] = useState('');
+	const [metricsFilter, setMetricsFilter] = useState('all');
 	const [currentPage, setCurrentPage] = useState(1);
 	const [dailyData, setDailyData] = useState([]);
 	const [weeklyData, setWeeklyData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const apiBaseUrl = import.meta.env.VITE_BACKEND_URL || '';
+	const dailyChartRef = useRef(null);
+	const weeklyChartRef = useRef(null);
+	const dailyChartInstanceRef = useRef(null);
+	const weeklyChartInstanceRef = useRef(null);
 
 	const entriesPerPage = 5;
 	useEffect(() => {
@@ -80,6 +129,9 @@ export default function Reports() {
 					const weekStart = new Date(sourceDate);
 					weekStart.setDate(sourceDate.getDate() - mondayOffset);
 					const weekKey = weekStart.toISOString().slice(0, 10);
+					const weekEnd = new Date(weekStart);
+					weekEnd.setDate(weekStart.getDate() + 4);
+					const weekEndKey = weekEnd.toISOString().slice(0, 10);
 					const key = `${row.userId}-${weekKey}`;
 
 					if (!acc[key]) {
@@ -87,7 +139,7 @@ export default function Reports() {
 							id: key,
 							name: row.name,
 							initials: row.initials,
-							date: `Week of ${weekKey}`,
+							date: `Week of ${weekKey} to ${weekEndKey}`,
 							regular: 0,
 							ot: 0,
 							nd: 0,
@@ -169,7 +221,132 @@ export default function Reports() {
 		0,
 	);
 
+	const summaryCards = [
+		{ label: 'Regular Hours', value: totalRegular, unit: 'h' },
+		{ label: 'Total Overtime', value: totalOT, unit: 'h' },
+		{ label: 'Total Late (min)', value: totalLate, unit: 'm' },
+		{ label: 'Undertime (min)', value: totalUndertime, unit: 'm' },
+	];
+		// ==============================
+	//  METRICS CHART
+	// ==============================
+	const getMetrics = (items) => {
+		let regularMinutes = 0;
+		let overtimeMinutes = 0;
+		let lateMinutes = 0;
+		let undertimeMinutes = 0;
 
+		for (let i = 0; i < items.length; i += 1) {
+			const item = items[i];
+			regularMinutes += parseFloat(item.regular) * 60;
+			overtimeMinutes += parseFloat(item.ot) * 60;
+			lateMinutes += parseFloat(item.late);
+			undertimeMinutes += parseFloat(item.undertime);
+		}
+
+		return {
+			regular: regularMinutes,
+			overtime: overtimeMinutes,
+			late: lateMinutes,
+			undertime: undertimeMinutes,
+		};
+	};
+
+	const filteredMetricDefinitions = useMemo(() => {
+		if (metricsFilter === 'hours')
+			return METRIC_DEFINITIONS.filter((metric) => metric.group === 'hours');
+		if (metricsFilter === 'attendance')
+			return METRIC_DEFINITIONS.filter((metric) => metric.group === 'attendance');
+		return METRIC_DEFINITIONS;
+	}, [metricsFilter]);
+
+	const chartLabels = filteredMetricDefinitions.map((metric) => metric.label);
+	const chartColors = filteredMetricDefinitions.map((metric) => metric.color);
+	const normalizedSearch = search.toLowerCase();
+	const filteredDailyData = useMemo(
+		() =>
+			dailyData.filter((item) =>
+				item.name.toLowerCase().includes(normalizedSearch),
+			),
+		[dailyData, normalizedSearch],
+	);
+	const filteredWeeklyData = useMemo(
+		() =>
+			weeklyData.filter((item) =>
+				item.name.toLowerCase().includes(normalizedSearch),
+			),
+		[weeklyData, normalizedSearch],
+	);
+	const dailyMetricsMap = useMemo(
+		() => getMetrics(filteredDailyData),
+		[filteredDailyData],
+	);
+	const weeklyMetricsMap = useMemo(
+		() => getMetrics(filteredWeeklyData),
+		[filteredWeeklyData],
+	);
+	const dailyMetrics = filteredMetricDefinitions.map(
+		(metric) => dailyMetricsMap[metric.key],
+	);
+	const weeklyMetrics = filteredMetricDefinitions.map(
+		(metric) => weeklyMetricsMap[metric.key],
+	);
+
+	useEffect(() => {
+		if (!dailyChartRef.current || !weeklyChartRef.current) return;
+
+		if (dailyChartInstanceRef.current) dailyChartInstanceRef.current.destroy();
+		if (weeklyChartInstanceRef.current) weeklyChartInstanceRef.current.destroy();
+
+		const baseOptions = {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: { legend: { display: false } },
+			scales: {
+				y: {
+					beginAtZero: true,
+					ticks: { precision: 0 },
+				},
+			},
+		};
+
+		dailyChartInstanceRef.current = new Chart(dailyChartRef.current, {
+			type: 'bar',
+			data: {
+				labels: chartLabels,
+				datasets: [
+					{
+						label: 'Daily Metrics',
+						data: dailyMetrics,
+						backgroundColor: chartColors,
+						borderRadius: 8,
+					},
+				],
+			},
+			options: baseOptions,
+		});
+
+		weeklyChartInstanceRef.current = new Chart(weeklyChartRef.current, {
+			type: 'bar',
+			data: {
+				labels: chartLabels,
+				datasets: [
+					{
+						label: 'Weekly Metrics',
+						data: weeklyMetrics,
+						backgroundColor: chartColors,
+						borderRadius: 8,
+					},
+				],
+			},
+			options: baseOptions,
+		});
+
+		return () => {
+			if (dailyChartInstanceRef.current) dailyChartInstanceRef.current.destroy();
+			if (weeklyChartInstanceRef.current) weeklyChartInstanceRef.current.destroy();
+		};
+	}, [dailyMetrics, weeklyMetrics, chartLabels, chartColors]);
 	return (
 		<main className="flex-1 flex flex-col overflow-hidden">
 			{/* HEADER */}
@@ -184,35 +361,43 @@ export default function Reports() {
 			<div className="flex-1 overflow-y-auto p-8">
 				{/* SUMMARY CARDS */}
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+					{summaryCards.map((card) => (
+						<SummaryCard
+							key={card.label}
+							label={card.label}
+							value={card.value}
+							unit={card.unit}
+						/>
+					))}
+				</div>
+
+				<div className="flex justify-end mb-3">
+					<select
+						value={metricsFilter}
+						onChange={(e) => setMetricsFilter(e.target.value)}
+						className="px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
+						<option value="all">All Metrics</option>
+						<option value="hours">Hours Only</option>
+						<option value="attendance">Attendance Only</option>
+					</select>
+				</div>
+
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 					<div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-						<p className="text-slate-500 text-sm font-medium">Regular Hours</p>
-						<div className="flex items-baseline gap-2 mt-1">
-							<h3 className="text-2xl font-bold">{totalRegular}h</h3>
+						<h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-4">
+							Daily Reports Metrics
+						</h3>
+						<div className="h-72">
+							<canvas ref={dailyChartRef} />
 						</div>
 					</div>
 
 					<div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-						<p className="text-slate-500 text-sm font-medium">Total Overtime</p>
-						<div className="flex items-baseline gap-2 mt-1">
-							<h3 className="text-2xl font-bold">{totalOT}h</h3>
-						</div>
-					</div>
-
-					<div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-						<p className="text-slate-500 text-sm font-medium">
-							Total Late (min)
-						</p>
-						<div className="flex items-baseline gap-2 mt-1">
-							<h3 className="text-2xl font-bold">{totalLate}m</h3>
-						</div>
-					</div>
-
-					<div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-						<p className="text-slate-500 text-sm font-medium">
-							Undertime (min)
-						</p>
-						<div className="flex items-baseline gap-2 mt-1">
-							<h3 className="text-2xl font-bold">{totalUndertime}m</h3>
+						<h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-4">
+							Weekly Reports Metrics
+						</h3>
+						<div className="h-72">
+							<canvas ref={weeklyChartRef} />
 						</div>
 					</div>
 				</div>
