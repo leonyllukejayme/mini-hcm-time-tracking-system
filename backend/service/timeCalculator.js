@@ -5,8 +5,7 @@ import utc from 'dayjs/plugin/utc.js'
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const APP_TIMEZONE = process.env.APP_TIMEZONE || process.env.TZ || 'Asia/Manila';
-dayjs.tz.setDefault(APP_TIMEZONE);
+// TODO: make the timezone from local and vercel  deployment are same.
 /**
  * Calculates work hours including regular, overtime, late, undertime, and night differential hours.
  * @param {string} timeIn - Clock-in time
@@ -16,12 +15,12 @@ dayjs.tz.setDefault(APP_TIMEZONE);
  * @returns {Object} Object containing totalWorkedHours, regularHours, overtimeHours, nightDiffHours, lateMinutes, undertimeMinutes
  */
 function calculateHours(timeIn, timeOut, scheduleStart, scheduleEnd) {
-	const start = dayjs.tz(timeIn, APP_TIMEZONE);
-	const end = dayjs.tz(timeOut, APP_TIMEZONE);
+	const start = dayjs(timeIn);
+	const end = dayjs(timeOut);
 
 	// Create shift boundaries using the same date as the clock-in time
-	const shiftStart = dayjs.tz(`${start.format('YYYY-MM-DD')} ${scheduleStart}`, APP_TIMEZONE);
-	const shiftEnd = dayjs.tz(`${start.format('YYYY-MM-DD')} ${scheduleEnd}`, APP_TIMEZONE);
+	const shiftStart = dayjs(start.format('YYYY-MM-DD') + ' ' + scheduleStart);
+	const shiftEnd = dayjs(start.format('YYYY-MM-DD') + ' ' + scheduleEnd);
 
 	// Calculate total minutes worked
 	const totalWorked = end.diff(start, 'minute');
