@@ -220,12 +220,17 @@ export default function Reports() {
 		(sum, item) => sum + parseFloat(item.undertime),
 		0,
 	);
+	const roundValue = (value) => Math.round(value * 100) / 100;
+	const roundedTotalRegular = roundValue(totalRegular);
+	const roundedTotalOT = roundValue(totalOT);
+	const roundedTotalLate = roundValue(totalLate);
+	const roundedTotalUndertime = roundValue(totalUndertime);
 
 	const summaryCards = [
-		{ label: 'Regular Hours', value: totalRegular, unit: 'h' },
-		{ label: 'Total Overtime', value: totalOT, unit: 'h' },
-		{ label: 'Total Late (min)', value: totalLate, unit: 'm' },
-		{ label: 'Undertime (min)', value: totalUndertime, unit: 'm' },
+		{ label: 'Regular Hours', value: roundedTotalRegular, unit: 'h' },
+		{ label: 'Total Overtime', value: roundedTotalOT, unit: 'h' },
+		{ label: 'Total Late (min)', value: roundedTotalLate, unit: 'm' },
+		{ label: 'Undertime (min)', value: roundedTotalUndertime, unit: 'm' },
 	];
 		// ==============================
 	//  METRICS CHART
