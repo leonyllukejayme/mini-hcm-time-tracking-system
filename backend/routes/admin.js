@@ -14,6 +14,9 @@ const router = express.Router();
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+const APP_TIMEZONE = process.env.APP_TIMEZONE || process.env.TZ || 'Asia/Manila';
+dayjs.tz.setDefault(APP_TIMEZONE);
+
 // Admin routes for attendance management
 
 router.get('/daily-reports/:date', verifyToken, isAdmin, async (req, res) => {
