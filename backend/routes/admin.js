@@ -1,5 +1,7 @@
 import axios from 'axios';
 import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone.js'
+import utc from 'dayjs/plugin/utc.js'
 import dotenv from 'dotenv';
 import express from 'express';
 import { admin, db } from '../config/firebase.js';
@@ -8,6 +10,9 @@ import verifyToken from '../middleware/auth.js';
 import { calculateHours } from '../service/timeCalculator.js';
 dotenv.config({ quiet: true });
 const router = express.Router();
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // Admin routes for attendance management
 
@@ -106,18 +111,9 @@ router.get('/users', verifyToken, isAdmin, async (req, res) => {
 router.put('/punches/:id', verifyToken, isAdmin, async (req, res) => {
 	try {
 		const { time_in, time_out } = req.body;
-		const parseTimeInput = (value) => {
-			if (
-				process.env.VERCEL &&
-				typeof value === 'string' &&
-				!/[zZ]|[+-]\d{2}:?\d{2}$/.test(value)
-			) {
-				return dayjs(`${value}+08:00`).toDate();
-			}
-			return dayjs(value).toDate();
-		};
-		const timeInTimestamp = parseTimeInput(time_in);
-		const timeOutTimestamp = parseTimeInput(time_out);
+		const timeInTimestamp = dayjs(time_in).utc().format();
+		const timeOutTimestamp = dayjs(time_out).utc().format();
+
 
 		// const doc = await db.collection('attendance').doc(req.params.id).get();
 		// if (!doc.exists) {
