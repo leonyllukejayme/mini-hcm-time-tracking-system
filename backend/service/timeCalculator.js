@@ -5,6 +5,7 @@ import utc from 'dayjs/plugin/utc.js'
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+dayjs.tz.setDefault('Asia/Manila');
 /**
  * Calculates work hours including regular, overtime, late, undertime, and night differential hours.
  * @param {string} timeIn - Clock-in time
