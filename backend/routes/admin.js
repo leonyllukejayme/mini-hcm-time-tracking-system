@@ -112,10 +112,10 @@ router.get('/users', verifyToken, isAdmin, async (req, res) => {
 router.put('/punches/:id', verifyToken, isAdmin, async (req, res) => {
 	try {
 		const { time_in, time_out } = req.body;
-		const timeInTimestamp = dayjs(time_in).utc().tz(MANILA_TZ).format();
-		const timeOutTimestamp = dayjs(time_out).utc().tz(MANILA_TZ).format();
+		const timeInTimestamp = dayjs(time_in).utc().tz(MANILA_TZ).toISOString();
+		const timeOutTimestamp = dayjs(time_out).utc().tz(MANILA_TZ).toISOString();
 
-
+		// console.log(timeInTimestamp)
 		// const doc = await db.collection('attendance').doc(req.params.id).get();
 		// if (!doc.exists) {
 		//     return res.status(404).json({ message: 'Punch record not found' });
