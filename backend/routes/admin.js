@@ -114,8 +114,8 @@ router.get('/users', verifyToken, isAdmin, async (req, res) => {
 router.put('/punches/:id', verifyToken, isAdmin, async (req, res) => {
 	try {
 		const { time_in, time_out } = req.body;
-		const timeInTimestamp = dayjs(time_in).utc().format();
-		const timeOutTimestamp = dayjs(time_out).utc().format();
+		const timeInTimestamp = dayjs.tz(dayjs(time_in).utc().format(),APP_TIMEZONE);
+		const timeOutTimestamp = dayjs.tz(dayjs(time_out).utc().format(),APP_TIMEZONE);
 
 
 		// const doc = await db.collection('attendance').doc(req.params.id).get();
