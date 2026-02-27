@@ -117,11 +117,30 @@ const EmployeeDashboard = () => {
 					</span>
 				</div>
 				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-					<SummaryCard title={'Regular Hours'} value={`${attendanceHistory[0]?.regularHours || 0}h`} />
-					<SummaryCard title={'Overtime (OT)'} value={`${attendanceHistory[0]?.overtimeHours || 0}h`} />
-					<SummaryCard title={'Night Diff (ND)'} value={`${attendanceHistory[0]?.nightHours || 0}h`} />
-					<SummaryCard title={'Late'} value={`${attendanceHistory[0]?.lateMinutes || 0}m`} />
-					<SummaryCard title={'Undertime'} value={`${attendanceHistory[0]?.underTimeMinutes || 0}m`} />
+					<SummaryCard
+						title={'Regular Hours'}
+						value={`${Math.round((attendanceHistory[0]?.regularHours || 0) * 100) / 100}h`}
+					/>
+
+					<SummaryCard
+						title={'Overtime (OT)'}
+						value={`${Math.round((attendanceHistory[0]?.overtimeHours || 0) * 100) / 100}h`}
+					/>
+
+					<SummaryCard
+						title={'Night Diff (ND)'}
+						value={`${Math.round((attendanceHistory[0]?.nightHours || 0) * 100) / 100}h`}
+					/>
+
+					<SummaryCard
+						title={'Late'}
+						value={`${Math.round((attendanceHistory[0]?.lateMinutes || 0) * 100) / 100}m`}
+					/>
+
+					<SummaryCard
+						title={'Undertime'}
+						value={`${Math.round((attendanceHistory[0]?.underTimeMinutes || 0) * 100) / 100}m`}
+					/>
 				</div>
 			</section>
 
