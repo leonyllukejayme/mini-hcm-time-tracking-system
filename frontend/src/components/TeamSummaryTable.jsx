@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import EditAttendanceModal from './EditAttendanceModal';
 import Badge from './Badge';
+import EditAttendanceModal from './EditAttendanceModal';
 
 const TeamSummaryTable = ({ employees = [], onEdit }) => {
 	const [open, setOpen] = useState(false);
@@ -10,7 +10,7 @@ const TeamSummaryTable = ({ employees = [], onEdit }) => {
 	const formatDateTime = (value) => {
 		if (!value) return '--';
 		const date = new Date(value);
-		if (Number.isNaN(date.getTime())) return '--';	
+		if (Number.isNaN(date.getTime())) return '--';
 		return date.toLocaleString([], {
 			year: 'numeric',
 			month: '2-digit',
@@ -24,19 +24,25 @@ const TeamSummaryTable = ({ employees = [], onEdit }) => {
 		return Number(employee?.lateMinutes || 0) > 0 ? 'Late' : 'On Time';
 	};
 
+	const safeDate = (value) => {
+		const date = new Date(value);
+		return isNaN(date.getTime()) ? null : date;
+	};
+
 	const handleOpenModal = (employee) => {
 		setSelectedEmployee(employee);
+
+		const timeIn = safeDate(employee?.timeIn);
+		const timeOut = safeDate(employee?.timeOut);
+
 		setAttendance({
-			clockInDate: employee?.timeIn ? new Date(employee.timeIn).toISOString().slice(0, 10) : '',
-			clockInTime: employee?.timeIn ? new Date(employee.timeIn).toTimeString().slice(0, 5) : '',
-			clockOutDate: employee?.timeOut
-				? new Date(employee.timeOut).toISOString().slice(0, 10)
-				: '',
-			clockOutTime: employee?.timeOut
-				? new Date(employee.timeOut).toTimeString().slice(0, 5)
-				: '',
+			clockInDate: timeIn ? timeIn.toISOString().slice(0, 10) : '',
+			clockInTime: timeIn ? timeIn.toTimeString().slice(0, 5) : '',
+			clockOutDate: timeOut ? timeOut.toISOString().slice(0, 10) : '',
+			clockOutTime: timeOut ? timeOut.toTimeString().slice(0, 5) : '',
 			dateLabel: employee?.date || '--',
 		});
+
 		setOpen(true);
 	};
 
